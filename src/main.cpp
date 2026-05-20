@@ -16,8 +16,8 @@
 #define WRITE_CHAR_UUID  "0000FF01-0000-1000-8000-00805F9B34FB"
 #define NOTIFY_CHAR_UUID "0000FF02-0000-1000-8000-00805F9B34FB"
 
-#define PWM_A_PIN   18   // change to match hardware
-#define PWM_B_PIN   19   // change to match hardware
+#define PWM_A_PIN   25
+#define PWM_B_PIN   26
 #define PWM_RES     8    // 8-bit: 0-255 duty counts; suits 100 kHz on 80 MHz APB
 
 static NimBLECharacteristic* pNotifyChar = nullptr;
@@ -87,7 +87,7 @@ static void handleLine(const String& line) {
 // ── BLE write callback ─────────────────────────────────────────────────────
 
 class WriteCallback : public NimBLECharacteristicCallbacks {
-    void onWrite(NimBLECharacteristic* pChar) override {
+    void onWrite(NimBLECharacteristic* pChar, NimBLEConnInfo& connInfo) override {
         rxBuf += pChar->getValue().c_str();
         int nl;
         while ((nl = rxBuf.indexOf('\n')) >= 0) {
@@ -115,11 +115,8 @@ void setup() {
     pNotifyChar = pSvc->createCharacteristic(
         NOTIFY_CHAR_UUID, NIMBLE_PROPERTY::NOTIFY);
 
-    pSvc->start();
-
     NimBLEAdvertising* pAdv = NimBLEDevice::getAdvertising();
     pAdv->addServiceUUID(SERVICE_UUID);
-    pAdv->setScanResponse(true);
     pAdv->start();
 
     Serial.println("REFINEPS ready");
