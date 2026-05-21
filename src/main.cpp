@@ -84,6 +84,14 @@ static void handleLine(const String& line) {
     }
 }
 
+// ── BLE server callbacks — restart advertising after disconnect ────────────
+
+class ServerCallbacks : public NimBLEServerCallbacks {
+    void onDisconnect(NimBLEServer* pServer, NimBLEConnInfo& connInfo, int reason) override {
+        NimBLEDevice::getAdvertising()->start();
+    }
+};
+
 // ── BLE write callback ─────────────────────────────────────────────────────
 
 class WriteCallback : public NimBLECharacteristicCallbacks {
@@ -106,6 +114,7 @@ void setup() {
 
     NimBLEDevice::init("REFINEPS");
     NimBLEServer*  pServer = NimBLEDevice::createServer();
+    pServer->setCallbacks(new ServerCallbacks());
     NimBLEService* pSvc    = pServer->createService(SERVICE_UUID);
 
     NimBLECharacteristic* pWriteChar = pSvc->createCharacteristic(
